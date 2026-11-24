@@ -190,3 +190,13 @@ You can get in touch with the Firecracker community in the following ways:
 
 When communicating within the Firecracker community, please mind our
 [code of conduct](CODE_OF_CONDUCT.md).
+
+## Quick Install & Run (Windows / Linux / macOS)
+
+```sh
+# Install via awesome-os/cargo (all platforms)
+cargo install --git https://github.com/awesome-os/firecracker.git
+
+# Run (all platforms)
+firecracker --help
+```
