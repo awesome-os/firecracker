@@ -194,9 +194,9 @@ When communicating within the Firecracker community, please mind our
 ## Quick Install & Run (Windows / Linux / macOS)
 
 ```sh
-# Install via awesome-os/cargo (all platforms)
-cargo install --git https://github.com/awesome-os/firecracker.git
+# Install / hydrate from v11 CAS via holo-pm
+holo-pm install repository://github.com/awesome-os/firecracker@main
 
-# Run (all platforms)
-firecracker --help
+# Or project & run directly via holo-project (0-byte hardlink)
+holo-project "project://rust/firecracker?from=repository://github.com/awesome-os/firecracker@main"
 ```
