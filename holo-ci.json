@@ -1,0 +1,15 @@
+{
+  "schema": "holo-ci.v1",
+  "name": "firecracker",
+  "kind": "native-fork",
+  "tests": [
+    "node -e \"const fs=require('node:fs'); if(!fs.existsSync('Cargo.toml')||!fs.existsSync('Cargo.lock')) process.exit(1)\""
+  ],
+  "docs": [
+    "README.md"
+  ],
+  "guards": {
+    "zeroGhost": true,
+    "zeroCasV1": true
+  }
+}
