@@ -10,23 +10,43 @@ permissions:
 
 jobs:
   holo-v11-verify:
-    name: Verify Repository Structure (Holo v11)
+    name: Verify Repository Structure & Cargo Metadata (Holo v11)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Verify structure and emit Holo v11 summary
+      - name: Validate Cargo workspace metadata & Holo v11 structure
         shell: bash
         run: |
           set -euo pipefail
           test -f README.md || test -f readme.md
+          test -f Cargo.toml
+          test -f Cargo.lock
           test -d .github/workflows
+
+          RUSTUP_TOOLCHAIN=stable cargo metadata --no-deps --locked --format-version 1 > /tmp/cargo-metadata.json
+          META_SUMMARY=$(python3 - <<'PY'
+          import json
+          with open("/tmp/cargo-metadata.json", "r", encoding="utf-8") as f:
+              data = json.load(f)
+          pkgs = data.get("packages", [])
+          fc = next((p for p in pkgs if p.get("name") == "firecracker"), None)
+          assert fc is not None, "firecracker package missing from workspace metadata"
+          print(f"{len(pkgs)}|{fc.get('version')}")
+          PY
+          )
+          CRATE_COUNT="${META_SUMMARY%%|*}"
+          FC_VERSION="${META_SUMMARY##*|}"
           WF_COUNT=$(find .github/workflows -maxdepth 1 -type f | wc -l)
-          echo "Holo v11 structure verified for firecracker (workflows: ${WF_COUNT})"
+
+          echo "Holo v11 verified for firecracker v${FC_VERSION} (crates: ${CRATE_COUNT}, workflows: ${WF_COUNT})"
           {
-            printf '### Holo v11 Repository Check — firecracker\n\n'
-            printf '- **Branch:** `main`\n'
-            printf '- **Workflow Count:** `%s`\n' "${WF_COUNT}"
-            printf '- **Status:** Structure verified (Holo v11 unified)\n'
+            printf '%s\n' '### Holo v11 Repository Check — firecracker'
+            printf '\n'
+            printf '%s\n' '- **Branch:** `main`'
+            printf '%s\n' "- **Firecracker Version:** \`${FC_VERSION}\`"
+            printf '%s\n' "- **Workspace Crates:** \`${CRATE_COUNT}\`"
+            printf '%s\n' "- **Workflow Count:** \`${WF_COUNT}\`"
+            printf '%s\n' '- **Status:** Cargo metadata & structure verified (Holo v11 unified)'
           } >> "$GITHUB_STEP_SUMMARY"
